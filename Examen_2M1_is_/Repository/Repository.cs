@@ -47,13 +47,32 @@ namespace Examen_2M1_is_.Repository
             return await query.AnyAsync();
         }
 
-        public async Task<List<T>> GetAllAsyn()
+        public async Task<List<T>> GetAllAsync(Expression<Func<T, bool>>? filter = null)
         {
 
-            return await _dbSet.ToListAsync();
+            IQueryable<T> query = _dbSet;
+            if (filter != null)
+            {
+                query = query.Where(filter);
+            }
+            return await query.ToListAsync();
         }
 
-        public async Task<T> GetByIdAsyn(int id)
+        public async Task<T> GetAsync(Expression<Func<T, bool>>? filter = null, bool tracked = true)
+        {
+            IQueryable<T> query = _dbSet;
+            if (!tracked)
+            {
+                query = query.AsNoTracking();
+            }
+            if (filter != null)
+            {
+                query = query.Where(filter);
+            }
+            return await query.FirstOrDefaultAsync();
+        }
+
+        public async Task<T> GetByIdAsync(int id)
         {
             return await _dbSet.FindAsync(id);
         }

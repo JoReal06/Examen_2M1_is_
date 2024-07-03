@@ -13,10 +13,10 @@ namespace Examen_2M1_is_.Controllers
     public class ReservasController : ControllerBase
     {
         private readonly IReservasRepository _reservasRepository;
-        private readonly ILogger _logger;
+        private readonly ILogger<ReservasController> _logger;
         private readonly IMapper _mapper;
 
-        public ReservasController(IReservasRepository reservasRepository, ILogger logger, IMapper mapper)
+        public ReservasController(IReservasRepository reservasRepository, ILogger<ReservasController> logger, IMapper mapper)
         {
             _reservasRepository = reservasRepository;
             _logger = logger;
@@ -31,7 +31,14 @@ namespace Examen_2M1_is_.Controllers
             {
                 _logger.LogInformation("Obteniendo las Reservaciones presentes");
 
-                var reservaciones = await _reservasRepository.GetAllAsyn();
+                var reservaciones = await _reservasRepository.GetAllAsync();
+
+                if (reservaciones == null)
+                {
+                    _logger.LogError("no hay ninguna reservacion registrada");
+                    return NotFound("no hay ninguna reservacion registrada actualmente");
+                }
+
 
                 return Ok(_mapper.Map<IEnumerable<ReservasDto>>(reservaciones));
             }
@@ -44,7 +51,7 @@ namespace Examen_2M1_is_.Controllers
         }
 
         [HttpGet("{id}")]
-        public async Task<ActionResult<IEnumerable<ReservasDto>>> GEtReserva(int id)
+        public async Task<ActionResult<ReservasDto>> GEtReserva(int id)
         {
             try
             {
@@ -57,11 +64,11 @@ namespace Examen_2M1_is_.Controllers
 
                 _logger.LogInformation("Obteniendo la reserva con el " + id);
 
-                var rerva = await _reservasRepository.GetByIdAsyn(id);
+                var rerva = await _reservasRepository.GetByIdAsync(id);
                 if (rerva == null)
                 {
                     _logger.LogWarning($"No se encontró ninguna reserva con este ID: {id}");
-                    return NotFound("habitacion no encontrada.");
+                    return NotFound("reserva no encontrada.");
                 }
                 return Ok(_mapper.Map<IEnumerable<ReservasDto>>(rerva));
             }
@@ -74,7 +81,7 @@ namespace Examen_2M1_is_.Controllers
         }
 
         [HttpPost]
-        public async Task<ActionResult<IEnumerable<ReservasDto>>> PostReservacion(ReservasCreateDto dto)
+        public async Task<ActionResult<ReservasDto>> PostReservacion(ReservasCreateDto dto)
         {
             if (dto == null)
             {
@@ -130,7 +137,7 @@ namespace Examen_2M1_is_.Controllers
             {
                 _logger.LogInformation($"Actualizando la reserva con ID: {updateDto.id}");
 
-                var existeReserva = await _reservasRepository.GetByIdAsyn(id);
+                var existeReserva = await _reservasRepository.GetByIdAsync(id);
                 if (existeReserva == null)
                 {
                     _logger.LogInformation($"No se encontró ninguna reserva con este id: {updateDto.id}");
@@ -139,7 +146,7 @@ namespace Examen_2M1_is_.Controllers
 
                 _mapper.Map(updateDto, existeReserva);
 
-                await _habitacionesRepository.SaveChangesAsync();
+                await _reservasRepository.SaveChangesAsync();
 
                 _logger.LogInformation($"la reserva con el  ID {id} se actualizo correctamente.");
 
@@ -177,7 +184,7 @@ namespace Examen_2M1_is_.Controllers
             {
                 _logger.LogInformation($"Eliminando reserva con el ID: {id}");
 
-                var reserva = await _reservasRepository.GetByIdAsyn(id);
+                var reserva = await _reservasRepository.GetByIdAsync(id);
                 if (reserva == null)
                 {
                     _logger.LogInformation($"La reserva con el : {id} no se encontro");

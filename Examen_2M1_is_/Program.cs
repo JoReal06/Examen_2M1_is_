@@ -1,6 +1,8 @@
 
 using AutoMapper;
 using Examen_2M1_is_.DAta;
+using Examen_2M1_is_.Repository;
+using Examen_2M1_is_.Repository.IRepository;
 using Microsoft.EntityFrameworkCore;
 
 namespace Examen_2M1_is_
@@ -17,6 +19,10 @@ namespace Examen_2M1_is_
                 options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
             builder.Services.AddAutoMapper(typeof(mapeador));
+            builder.Services.AddScoped<IHabitacionesRepository, HabitacionesRepository>();
+
+            builder.Services.AddScoped<IReservasRepository, ReservasRepository>();
+
 
 
             builder.Services.AddControllers();

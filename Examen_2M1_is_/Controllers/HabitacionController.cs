@@ -13,10 +13,10 @@ namespace Examen_2M1_is_.Controllers
     public class HabitacionController : ControllerBase
     {
         private readonly IHabitacionesRepository _habitacionesRepository;
-        private readonly ILogger _logger;
+        private readonly ILogger<HabitacionController> _logger;
         private readonly IMapper _mapper;
 
-        public HabitacionController(IHabitacionesRepository habitacionesRepository, ILogger logger, IMapper mapper)
+        public HabitacionController(IHabitacionesRepository habitacionesRepository, ILogger<HabitacionController> logger, IMapper mapper)
         {
             _habitacionesRepository = habitacionesRepository;
             _logger = logger;
@@ -31,7 +31,12 @@ namespace Examen_2M1_is_.Controllers
             {
                 _logger.LogInformation("Obteniendo las habitaicones presentes");
 
-                var habitaciones = await _habitacionesRepository.GetAllAsyn();
+                var habitaciones = await _habitacionesRepository.GetAllAsync();
+                if (habitaciones == null)
+                {
+                    _logger.LogError("no hay ninguna habitacion registrada");
+                    return NotFound("no hay ninguna habitacion registrada actualmente");
+                }
 
                 return Ok(_mapper.Map<IEnumerable<HabitacionesDto>>(habitaciones));
             }
@@ -44,7 +49,7 @@ namespace Examen_2M1_is_.Controllers
         }
 
         [HttpGet("{id}")]
-        public async Task<ActionResult<IEnumerable<HabitacionesDto>>> GetHabitacion(int id)
+        public async Task<ActionResult<HabitacionesDto>> GetHabitacion(int id)
         {
             try
             {
@@ -57,7 +62,7 @@ namespace Examen_2M1_is_.Controllers
 
                 _logger.LogInformation("Obteniendo la habitaciones con el " + id);
 
-                var habiitacion = await _habitacionesRepository.GetByIdAsyn(id);
+                var habiitacion = await _habitacionesRepository.GetByIdAsync(id);
                 if (habiitacion == null)
                 {
                     _logger.LogWarning($"No se encontró ninguna habitacion con este ID: {id}");
@@ -74,7 +79,7 @@ namespace Examen_2M1_is_.Controllers
         }
 
         [HttpPost]
-        public async Task<ActionResult<IEnumerable<HabitacionesDto>>> PostHabitaciones(HabitacionesCreateDTo dto)
+        public async Task<ActionResult<HabitacionesDto>> PostHabitaciones(HabitacionesCreateDTo dto)
         {
             if (dto == null)
             {
@@ -130,7 +135,7 @@ namespace Examen_2M1_is_.Controllers
             {
                 _logger.LogInformation($"Actualizando la habitacion con ID: {updateDto.id}");
 
-                var existehabitaciones = await _habitacionesRepository.GetByIdAsyn(id);
+                var existehabitaciones = await _habitacionesRepository.GetByIdAsync(id);
                 if (existehabitaciones == null)
                 {
                     _logger.LogInformation($"No se encontró ninguna habitacion con este numero: {updateDto.NumDeHabitacion}");
@@ -177,7 +182,7 @@ namespace Examen_2M1_is_.Controllers
             {
                 _logger.LogInformation($"Eliminando habitaciones con el ID: {id}");
 
-                var habitacion = await _habitacionesRepository.GetByIdAsyn(id);
+                var habitacion = await _habitacionesRepository.GetByIdAsync(id);
                 if (habitacion == null)
                 {
                     _logger.LogInformation($"La habitacion con el : {id} no se encontro");
