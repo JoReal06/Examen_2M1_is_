@@ -25,7 +25,7 @@ namespace Examen_2M1_is_.Controllers
 
 
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<HabitacionesDto>>> GetReservacion()
+        public async Task<ActionResult<IEnumerable<ReservasDto>>> GetReservacion()
         {
             try
             {
@@ -44,7 +44,7 @@ namespace Examen_2M1_is_.Controllers
         }
 
         [HttpGet("{id}")]
-        public async Task<ActionResult<IEnumerable<HabitacionesDto>>> GEtReserva(int id)
+        public async Task<ActionResult<IEnumerable<ReservasDto>>> GEtReserva(int id)
         {
             try
             {
@@ -74,126 +74,126 @@ namespace Examen_2M1_is_.Controllers
         }
 
         [HttpPost]
-        public async Task<ActionResult<IEnumerable<HabitacionesDto>>> PostHabitaciones(HabitacionesCreateDTo dto)
+        public async Task<ActionResult<IEnumerable<ReservasDto>>> PostReservacion(ReservasCreateDto dto)
         {
             if (dto == null)
             {
-                _logger.LogError("Se recibió una habitacion nula en la solicitud.");
-                return BadRequest("la habitacion no puede ser nula.");
+                _logger.LogError("Se recibió una reservacion nula en la solicitud.");
+                return BadRequest("la reserva no puede ser nula.");
             }
 
             try
             {
-                _logger.LogInformation($"Creando una nueva habitacion de tipo {dto.TipoDeHabitacion}");
+                _logger.LogInformation($"Creando una nueva reservacion con habitacion id: {dto.habitacionId}");
 
-                var ExisteHabitacion = await _habitacionesRepository.GetAsync(e => e.NumDeHabitacion == dto.NumDeHabitacion);
+                var ExisteREserva = await _reservasRepository.GetAsync(e => e.habitacionId == dto.habitacionId);
 
 
 
-                if (ExisteHabitacion != null)
+                if (ExisteREserva != null)
                 {
-                    _logger.LogWarning($"La habitacion que sequiere registrar ya existe {dto.NumDeHabitacion}");
-                    ModelState.AddModelError("Habitacion ya existente", "ya existe esta habitacion");
+                    _logger.LogWarning($"La reserva que quiere registrar ya existe con esta id de habitaicon{dto.habitacionId}");
+                    ModelState.AddModelError("reserva ya existente", "ya existe esta reserva");
                     return BadRequest(ModelState);
                 }
 
                 if (!ModelState.IsValid)
                 {
-                    _logger.LogError("El modelo de la habitacion no es válida.");
+                    _logger.LogError("El modelo de la reserva no es válida.");
                     return BadRequest(ModelState);
                 }
-                var nuevaHabitaicon = _mapper.Map<Habitaciones>(dto);
+                var reserva = _mapper.Map<Reservas>(dto);
 
-                await _habitacionesRepository.CreateAsycn(nuevaHabitaicon);
+                await _reservasRepository.CreateAsycn(reserva);
 
-                _logger.LogInformation($"Nueva habitacion con el numero de habitacion '{dto.NumDeHabitacion}");
-                return CreatedAtAction(nameof(GetHabitacion), new { id = nuevaHabitaicon.id }, nuevaHabitaicon);
+                _logger.LogInformation($"Nueva reserva con el id de habitacion '{dto.habitacionId}");
+                return CreatedAtAction(nameof(GEtReserva), new { id = reserva }, reserva);
             }
             catch (Exception ex)
             {
-                _logger.LogError($"Error al crear una nueva habitacion: {ex.Message}");
+                _logger.LogError($"Error al crear una nueva reserva: {ex.Message}");
                 return StatusCode(StatusCodes.Status500InternalServerError,
-                    "Error interno del servidor al crear una nueva habitacion.");
+                    "Error interno del servidor al crear una nueva reserva.");
             }
         }
 
         [HttpPut]
-        public async Task<IActionResult> PutHabitacion(int id, HabitacionesUpdateDto updateDto)
+        public async Task<IActionResult> PutReserva(int id, ReservasUpdateDto updateDto)
         {
             if (updateDto == null)
             {
                 return BadRequest("Los datos de entrada no son válidos o " +
-                    "el ID de la deduccion no coincide.");
+                    "el ID de la reserva no coincide.");
             }
 
             try
             {
-                _logger.LogInformation($"Actualizando la habitacion con ID: {updateDto.id}");
+                _logger.LogInformation($"Actualizando la reserva con ID: {updateDto.id}");
 
-                var existehabitaciones = await _habitacionesRepository.GetByIdAsyn(id);
-                if (existehabitaciones == null)
+                var existeReserva = await _reservasRepository.GetByIdAsyn(id);
+                if (existeReserva == null)
                 {
-                    _logger.LogInformation($"No se encontró ninguna habitacion con este numero: {updateDto.NumDeHabitacion}");
-                    return NotFound("la habitacion no existe.");
+                    _logger.LogInformation($"No se encontró ninguna reserva con este id: {updateDto.id}");
+                    return NotFound("la reserva no existe.");
                 }
 
-                _mapper.Map(updateDto, existehabitaciones);
+                _mapper.Map(updateDto, existeReserva);
 
                 await _habitacionesRepository.SaveChangesAsync();
 
-                _logger.LogInformation($"la habitacion con el  ID {id} se actualizo correctamente.");
+                _logger.LogInformation($"la reserva con el  ID {id} se actualizo correctamente.");
 
                 return NoContent();
             }
             catch (DbUpdateConcurrencyException ex)
             {
-                if (!await _habitacionesRepository.ExistsAsync(s => s.id == id))
+                if (!await _reservasRepository.ExistsAsync(s => s.id == id))
                 {
-                    _logger.LogWarning($"No se encontró ningúna habitacion con el ID: {id}");
-                    return NotFound("la habitacion no se encontró durante la actualización");
+                    _logger.LogWarning($"No se encontró ningúna reserva con el ID: {id}");
+                    return NotFound("la reserva no se encontró durante la actualización");
                 }
                 else
                 {
-                    _logger.LogError($"Error de concurrencia al actualizar la habitacion" +
+                    _logger.LogError($"Error de concurrencia al actualizar la reserva" +
                         $"con ID: {id}. Detalles: {ex.Message}");
                     return StatusCode(StatusCodes.Status500InternalServerError,
-                        "Error interno del servidor al actualizar la habitacion.");
+                        "Error interno del servidor al actualizar la reserva.");
                 }
             }
             catch (Exception ex)
             {
-                _logger.LogError($"Error al actualizar la habitacion {ex.Message}");
+                _logger.LogError($"Error al actualizar la reserva {ex.Message}");
                 return StatusCode(StatusCodes.Status500InternalServerError,
-                    "Error interno del servidor al actualizar la habitacion.");
+                    "Error interno del servidor al actualizar la reserva.");
             }
 
         }
 
         [HttpDelete]
-        public async Task<IActionResult> DeleteHabitacion(int id)
+        public async Task<IActionResult> deleeReserva(int id)
         {
 
             try
             {
-                _logger.LogInformation($"Eliminando habitaciones con el ID: {id}");
+                _logger.LogInformation($"Eliminando reserva con el ID: {id}");
 
-                var habitacion = await _habitacionesRepository.GetByIdAsyn(id);
-                if (habitacion == null)
+                var reserva = await _reservasRepository.GetByIdAsyn(id);
+                if (reserva == null)
                 {
-                    _logger.LogInformation($"La habitacion con el : {id} no se encontro");
-                    return NotFound("habitacion no encontrado.");
+                    _logger.LogInformation($"La reserva con el : {id} no se encontro");
+                    return NotFound("reserva no encontrado.");
                 }
 
-                await _habitacionesRepository.DeleteAsync(habitacion);
+                await _reservasRepository.DeleteAsync(reserva);
 
-                _logger.LogInformation($"la habitacion con ID {id} eliminado correctamente.");
+                _logger.LogInformation($"la reserva con ID {id} eliminado correctamente.");
                 return NoContent();
             }
             catch (Exception ex)
             {
-                _logger.LogError($"Error al eliminar la habitacione con ID {id}: {ex.Message}");
+                _logger.LogError($"Error al eliminar la reserva con ID {id}: {ex.Message}");
                 return StatusCode(StatusCodes.Status500InternalServerError,
-                    "Se produjo un error al eliminar la habitacion.");
+                    "Se produjo un error al eliminar la reserva.");
             }
         }
 

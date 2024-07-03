@@ -1,4 +1,5 @@
 
+using AutoMapper;
 using Examen_2M1_is_.DAta;
 using Microsoft.EntityFrameworkCore;
 
@@ -15,7 +16,8 @@ namespace Examen_2M1_is_
             builder.Services.AddDbContext<HotelContext>(options =>
                 options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-            //builder.Services.AddAutoMapper(typeof(Mapeo));
+            builder.Services.AddAutoMapper(typeof(mapeador));
+
 
             builder.Services.AddControllers();
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
