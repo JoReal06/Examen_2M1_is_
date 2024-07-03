@@ -125,7 +125,7 @@ namespace Examen_2M1_is_.Controllers
         }
 
         [HttpPut]
-        public async Task<IActionResult> PutReserva(int id, ReservasUpdateDto updateDto)
+        public async Task<ActionResult<ReservasDto>> PutReserva(int id, ReservasUpdateDto updateDto)
         {
             if (updateDto == null)
             {
